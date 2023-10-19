@@ -38,13 +38,20 @@ int main(int argc, char* argv)
 
 			std::string messageToSend;
 
-			if (client.GetConnected()) 
+			if (client.GetConnected() && !msg.empty()) 
 			{
-				std::ostringstream stream;
+				//std::ostringstream stream;
 
-				stream << client.GetUsername() << ": " << msg;
+				//// Figure something out later about this
+				//// Send Just the message
 
-				messageToSend = stream.str();
+				//stream << client.GetUsername() << ": " << msg;
+
+				//messageToSend = stream.str();
+
+
+				// Send out the raw message, the username will get handled by the server probably
+				messageToSend = msg;
 
 				
 			}

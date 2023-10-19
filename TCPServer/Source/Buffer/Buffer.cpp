@@ -1,5 +1,5 @@
 #include "Buffer.h"
-
+#include <iostream>
 
 namespace FanshaweGameEngine
 {
@@ -18,7 +18,7 @@ namespace FanshaweGameEngine
 		void Buffer::WriteUInt32(const size_t index, const uint32_t value)
 		{
 
-			ResizeBuffer(index + sizeof(value));
+			ResizeBuffer(index + sizeof(value) + value);
 
 			
 
@@ -55,12 +55,13 @@ namespace FanshaweGameEngine
 		{
 
 			WriteUInt32(m_writeIndex, value);
-			m_writeIndex ++;
+			m_writeIndex +=4;
 
 		}
 
 		void Buffer::WriteString(const std::string msg)
 		{
+
 			for (int i = 0; i < msg.length(); i++)
 			{
 				m_buffer[m_writeIndex] = msg[i];
@@ -106,7 +107,15 @@ namespace FanshaweGameEngine
 		{
 			if (size > m_buffer.size())
 			{// Growing the buffer
+
+
+
+
+				SetConsoleTextAttribute(hConsole, debugAttrib);
+				std::cout << "                [ Growing the Buffer ]          " << std::endl;
+
 				m_buffer.resize(size);
+				
 			}
 		}
 	}

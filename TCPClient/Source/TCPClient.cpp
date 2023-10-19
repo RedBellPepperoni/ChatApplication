@@ -38,6 +38,8 @@ namespace FanshaweGameEngine
 				return false;
 			}
 
+			// Setting Endianness to Big endian
+			m_buffer.SetEndian(Buffer::Endianness::BIG_ENDIAN);
 
 			return true;
 		}
@@ -60,16 +62,11 @@ namespace FanshaweGameEngine
 			}
 
 
-			// If we successfully connect, send a message to the server announcing the connection
-			std::ostringstream stream;
-
-
-			stream << GetUsername() << " joined the chat!\n";
-			std::string messageToSend = stream.str();
+			// If we successfully connect, send a message to the server providing our Username
+			//std::string messageToSend = GetUsername() + " : Has Connected";
+			std::string messageToSend = GetUsername();
 
 			m_hasConnected = true;
-
-
 			SendMsg(messageToSend);
 
 		}
@@ -87,6 +84,8 @@ namespace FanshaweGameEngine
 			uint32_t length = msgText.length();
 
 			m_buffer.ClearBuffer();
+
+			// using endian Encoding to Write to the buffer
 			m_buffer.WriteUInt32(length);
 
 			m_buffer.WriteString(msgText);
@@ -99,22 +98,58 @@ namespace FanshaweGameEngine
 			
 		}
 
+		int TCPClient::ReceiveMsg(SOCKET sock, std::string& decodedMessage)
+		{
+			m_buffer.ClearBuffer();
+
+			// Get the First 4 bytes to get the message length (LENGTH PREFIXING)
+			int bytesReceived = recv(sock, m_buffer.Get(), 4, 0);
+
+			if (bytesReceived <= 0)
+			{
+				return -1;
+			}
+
+
+			// Use Endian Decoding to gather the incoming mesasage Length
+			int messageLength = m_buffer.ReadUInt32();
+
+			//Clear the buffer before receiving data. 
+			m_buffer.ClearBuffer();
+
+			// Growing the Buffer if needed
+			m_buffer.ResizeBuffer(messageLength);
+
+			// Getting the rest of he message
+			bytesReceived = recv(sock, m_buffer.Get(), messageLength, 0);
+
+			decodedMessage = std::string(m_buffer.Get(), 0, bytesReceived);
+
+			return bytesReceived;
+		}
+
 		void TCPClient::ThreadReceive()
 		{
 			m_threadRunning = true;
 
 			while (m_threadRunning)
 			{
-				char buffer[4096];
-				ZeroMemory(buffer, 4096);
-
-				int bytesReceived = recv(m_serverSocket, buffer, 4096, 0);
+				std::string message;
+				int bytesReceived = ReceiveMsg(m_serverSocket, message);
 
 				if (bytesReceived > 0)
 				{
-					std::cout << std::string(buffer, 0, bytesReceived) << std::endl;
+					std::cout << message << std::endl;
+				}
+				else
+				{
+					std::cout << " Server Doesnt Exist " << std::endl;
+					m_threadRunning = false;
+					
 				}
 			}
+
+			
 
 		}
 

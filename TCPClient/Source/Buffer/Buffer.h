@@ -18,12 +18,11 @@ namespace FanshaweGameEngine
 
 
 		public:
-			Buffer(size_t size = 512);
+			Buffer(size_t size = 16);
 			~Buffer();
 
 			void WriteUInt32(const size_t index, const uint32_t value);
 			void WriteUInt32(const uint32_t value);
-
 			void WriteString(const std::string msg);
 
 			uint32_t ReadUInt32(const size_t index);

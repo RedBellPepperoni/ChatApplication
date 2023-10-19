@@ -18,7 +18,7 @@ namespace FanshaweGameEngine
 		void Buffer::WriteUInt32(const size_t index, const uint32_t value)
 		{
 
-			ResizeBuffer(index + sizeof(value));
+			ResizeBuffer(index + sizeof(value) + value);
 
 			
 
@@ -55,12 +55,13 @@ namespace FanshaweGameEngine
 		{
 
 			WriteUInt32(m_writeIndex, value);
-			m_writeIndex += 4;
+			m_writeIndex +=4;
 
 		}
 
 		void Buffer::WriteString(const std::string msg)
 		{
+
 			for (int i = 0; i < msg.length(); i++)
 			{
 				m_buffer[m_writeIndex] = msg[i];
@@ -96,9 +97,9 @@ namespace FanshaweGameEngine
 		{
 			// Setting each element of the memeory set to 0
 			// Essentially clearing the buffer without resizing 
-			std::fill(m_buffer.begin(), m_buffer.end(), 0);
 			m_writeIndex = 0;
 			m_readIndex = 0;
+			std::fill(m_buffer.begin(), m_buffer.end(), 0);
 		}
 
 
@@ -106,9 +107,11 @@ namespace FanshaweGameEngine
 		{
 			if (size > m_buffer.size())
 			{// Growing the buffer
+
+				printf("Growing the Buffer");
+
 				m_buffer.resize(size);
-				m_writeIndex = 0;
-				m_readIndex = 0;
+				
 			}
 		}
 	}

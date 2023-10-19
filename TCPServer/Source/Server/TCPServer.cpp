@@ -46,9 +46,15 @@ namespace FanshaweGameEngine
 				return false;
 			}
 
+			// Setting Endianness to Big endian
+			//m_buffer.SetEndian(Buffer::Endianness::BIG_ENDIAN);
+
 
 			// Winsock Intitialized successfully
-			printf("WSAStartup succeeded!\n");
+			SetConsoleTextAttribute(hConsole, 12);
+			std::cout << "Fanshawe Chat Server is Online!..." << std::endl;
+			SetConsoleTextAttribute(hConsole, messageAttrib);
+
 			return true;
 		}
 
@@ -99,6 +105,9 @@ namespace FanshaweGameEngine
 					// Get msgs only from the specified sockets
 					for (int i = 0; i < socketCount; i++)
 					{
+						
+
+
 						// Looping through all the scokets that are active
 						SOCKET sock = copyDesc.fd_array[i];
 
@@ -114,81 +123,129 @@ namespace FanshaweGameEngine
 
 							//Tell the client that the connection is successful
 							std::string connectionMsg = "Connected to Fanshawe Chat Server!!\n";
-							send(client, connectionMsg.c_str(), connectionMsg.size() + 1, 0);
+							
+							// Ackknowlege the connection by sending a welcome message to the client
+							SendMsg(client, connectionMsg);
 
-							//std::cout << "New user joined the chat." << std::endl;			//Log connection on server side. 
+							// Conatiner to store incoming username
+							std::string userName;
 
+							// Since this is the first time a client is connectiing, the first message it will send is the Username
+							ReceiveMsg(client, userName);
+							
+							// Bind teh socket and username in the map
+							m_clientMap.emplace(client, userName);
+
+							SetConsoleTextAttribute(hConsole, debugAttrib);
+							// broadcast message to be sent to All other connected clients
+							std::string joinMsg ="          [ " + userName + " has entered the Chat!! ]";
+							SetConsoleTextAttribute(hConsole, messageAttrib);
+
+							// Loop Through all the sockets
+							for (uint32_t i = 0; i < masterDesc.fd_count; i++)
+							{
+								SOCKET outSock = masterDesc.fd_array[i];
+
+								if (outSock != ListenerSocket)
+								{
+									if (outSock != client)
+									{	
+										//All other sockest should receive the msg (except the one that is connecting)
+										SendMsg(outSock,joinMsg);
+									}
+								}	
+							}
+
+							// Output the messae on teh server terminal
+							std::cout << joinMsg << std::endl;
 						}
 
-						// ============================= Recieve a Message ===================================
+						//// ============================= Recieve a Message ===================================
 						else
 						{
 
-							m_buffer.ClearBuffer();
+							// Get the decodedMessage from the socket
+							const char* displaymsg;
+							std::string message;
+							std::string finalMessage;
 
-							// Get the First 4 bytes to get the message length (LENGTH PREFIXING)
+							// Store the username of the sending socket
+							std::string username = m_clientMap[sock];
 
-							int bytesReceived = recv(sock, m_buffer.Get(), 4, 0);
+							// Receive the Length prefixed message and decode it
+							int bytesReceived = ReceiveMsg(sock, message);
 
-							int messageLength = m_buffer.ReadUInt32();
-
-
-							
-
-							//Clear the buffer before receiving data. 
-							m_buffer.ClearBuffer();	
-
-							// Growing the Buffer if needed
-							m_buffer.ResizeBuffer(messageLength);
-
-							// Getting the rest of he message
-							bytesReceived = recv(sock, m_buffer.Get(), messageLength, 0);
+							// Add the username identifier to teh message before broadcasting
+							finalMessage = username + " : " + message;
 
 
-							//int bytesReceived = recv(sock, m_buffer.Get(), 512, 0);
-
-
-							// No message received
+							// No message received ()
 							if (bytesReceived <= 0)
 							{
+								SetConsoleTextAttribute(hConsole, debugAttrib);
 								// Close the client connection
+								finalMessage = username + " has left the Chat :(";
+								SetConsoleTextAttribute(hConsole, messageAttrib);
+
+								// Clear the username and the socket bind
+								m_clientMap.erase(sock);
+
+								// close the disconnected socket
 								closesocket(sock);
-								FD_CLR(sock, &masterDesc);	//Remove connection from file director.
+
+								//Remove connection from file discriptor
+								FD_CLR(sock, &masterDesc);	
+
+								SetConsoleTextAttribute(hConsole, debugAttrib);
+								std::cout << "          [ " + username + " has left the Chat!! ]" << std::endl;
+								SetConsoleTextAttribute(hConsole, messageAttrib);
 							}
 
 							else
 							{
+								// If time permits add user colors and stuff
+								SetConsoleTextAttribute(hConsole, senderAttrib);
+								std::cout << username << " : ";
 
-								//Send msg to other clients & not listening socket. 
-								// 
-								//Loop through the sockets. 
-								for (int i = 0; i < masterDesc.fd_count; i++)
-								{
-									SOCKET outSock = masterDesc.fd_array[i];
-
-									if (outSock != ListenerSocket) {
-
-										if (outSock == sock) {		//If the current socket is the one that sent the message:
-											std::string msgSent = "Message delivered.\n";
-											send(outSock, msgSent.c_str(), msgSent.size() + 1, 0);	//Notify the client that the msg was delivered. 	
-										}
-										else {						//If the current sock is not the sender -> it should receive the msg. 
-											//std::ostringstream ss;
-											//ss << "SOCKET " << sock << ": " << buf << "\n";
-											//std::string strOut = ss.str();
-											//m_buffer.ClearBuffer();
-
-											send(outSock, m_buffer.Get(), bytesReceived, 0);		//Send the msg to the current socket. 
-										}
-
-									}
-								}
-
-								
-
-								std::cout << std::string(m_buffer.Get(), 0, bytesReceived) << std::endl;				//Log the message on the server side. 
+								SetConsoleTextAttribute(hConsole, messageAttrib);
+								std::cout << message << std::endl;
 
 							}
+
+						
+
+
+							for (uint32_t i = 0; i < masterDesc.fd_count; i++)
+							{
+								SOCKET outSock = masterDesc.fd_array[i];
+
+								if (outSock != ListenerSocket)
+								{
+
+
+									if (outSock == sock)
+									{	//If the current socket is the one that sent the message:
+										std::string msgSent = "Message delivered.";
+										
+										SendMsg(outSock, msgSent);
+									}
+
+									else
+									{	//All other sockest should receive the msg 
+
+										
+										SendMsg(outSock, finalMessage);
+									}
+
+
+								}
+
+								//if()
+							}
+
+							//std::cout << message << std::endl;				//Log the message on the server side. 
+
+							
 
 						}
 					}
@@ -198,17 +255,31 @@ namespace FanshaweGameEngine
 
 
 
-
-
-
-			
-
-
-
-
 		}
-		void TCPServer::SendMsg()
+
+		void TCPServer::SendMsg(SOCKET sock, const std::string message)
 		{
+			if (message.empty() || sock == INVALID_SOCKET)
+			{
+				return;
+			}
+
+			// getiign teh length for Length prefising
+			size_t length = message.length();
+
+			m_buffer.ClearBuffer();
+
+			m_buffer.WriteUInt32(length);
+
+
+			m_buffer.WriteString(message);
+
+
+			const char* bufferText = m_buffer.Get();
+
+
+			send(sock, bufferText, length + 4, 0);
+
 		}
 
 		SOCKET TCPServer::CreateSocket()
@@ -279,6 +350,30 @@ namespace FanshaweGameEngine
 
 	
 			return ListenerSocket;
+		}
+
+		int TCPServer::ReceiveMsg(SOCKET socket, std::string& decodedmessage)
+		{
+			m_buffer.ClearBuffer();
+
+			// Get the First 4 bytes to get the message length (LENGTH PREFIXING)
+			int bytesReceived = recv(socket, m_buffer.Get(), 4, 0);
+
+			// Use Endian Decoding to gather the incoming mesasage Length
+			int messageLength = m_buffer.ReadUInt32();
+
+			//Clear the buffer before receiving data. 
+			m_buffer.ClearBuffer();
+
+			// Growing the Buffer if needed
+			m_buffer.ResizeBuffer(messageLength);
+
+			// Getting the rest of he message
+			bytesReceived = recv(socket, m_buffer.Get(), messageLength, 0);
+
+			decodedmessage = std::string(m_buffer.Get(), 0, bytesReceived);
+
+			return bytesReceived;
 		}
 
 	}

@@ -141,6 +141,11 @@
     <ClCompile Include="Source\TCPClient.cpp" />
     <ClCompile Include="Source\clientMain.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TCPServer\TCPServer.vcxproj">
+      <Project>{08b74ec5-3e97-4606-a222-d0eac0e13b9a}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

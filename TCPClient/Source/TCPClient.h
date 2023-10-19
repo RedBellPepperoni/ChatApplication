@@ -23,6 +23,7 @@ namespace FanshaweGameEngine
 			void Connect();
 
 			void SendMsg(const std::string msgText);
+			int ReceiveMsg(SOCKET sock, std::string& decodedMessage);
 
 			std::thread m_clientThread;
 			void ThreadReceive();
@@ -49,6 +50,7 @@ namespace FanshaweGameEngine
 
 			struct addrinfo* info = nullptr;
 
+			// Default Bugger is using Big Endian
 			Buffer m_buffer;
 		};
 	}

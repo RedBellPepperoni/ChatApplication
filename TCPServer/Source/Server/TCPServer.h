@@ -2,7 +2,7 @@
 #include <string>
 #include "Buffer/Buffer.h"
 
-
+#include <map>
 #include <WS2tcpip.h>
 #pragma comment (lib, "ws2_32.lib")
 
@@ -30,12 +30,17 @@ namespace FanshaweGameEngine
 			void Run();
 
 			// For some reason SendMessage is defined in windows 
-			void SendMsg();
+			void SendMsg(SOCKET sock,const std::string message);
+
+
+
 
 
 		private:
 
 			SOCKET CreateSocket();
+
+			int ReceiveMsg(SOCKET socket, std::string& decodedmessage);
 
 			std::string m_serverIPaddress;
 			uint32_t m_serverPort;
@@ -43,6 +48,25 @@ namespace FanshaweGameEngine
 			Buffer m_buffer;
 
 			bool isRunning = false;
+
+			std::map<SOCKET, std::string> m_clientMap;
+
+			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			// Text Color For the Message
+			const int messageAttrib = 
+				  FOREGROUND_BLUE
+				| FOREGROUND_RED
+				| FOREGROUND_GREEN
+				| FOREGROUND_INTENSITY;
+
+			// Text Color for the Sender Name
+			const int senderAttrib =  
+				  FOREGROUND_RED
+				| FOREGROUND_GREEN;
+
+			//Text Color for Debug stuff
+			const int debugAttrib = FOREGROUND_INTENSITY;
 
 		};
 	}
