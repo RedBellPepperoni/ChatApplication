@@ -41,3 +41,19 @@ Extra Features Implemented : <br>
 > 
 > Step 5: Run multiple instances of TCPClients to simulate multiple users
 <br>
+
+
+
+## Multiple clients sending messgaes <br>
+ ![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/multiclient.png)
+ <br>
+
+## Server Side View <br>
+ ![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/server.png)
+<br>
+
+## UserName Clash <br>
+ ![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/UsernameClash.png)
+
+
+
