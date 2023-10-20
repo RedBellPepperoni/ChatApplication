@@ -19,8 +19,9 @@ Goals of the assignment : <br>
 
 <br>
 Extra Features Implemented : <br>
-<br>
->
+
+
+
 > Replicated User Colors and Message colors
 > 
 > Max connection limit (any connection after that get feedback msg from the server saying server Full)
