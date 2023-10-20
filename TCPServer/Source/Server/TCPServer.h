@@ -128,7 +128,7 @@ namespace FanshaweGameEngine
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 			// Total number of clients that can connect before we refuse any other connections
-			const int m_maxClients = 2;
+			const int m_maxClients = 10;
 
 			
 			// Conatiner to chekc if a chat color is in use (10 base colors and 1 extra incase needed)

@@ -148,12 +148,54 @@ namespace FanshaweGameEngine
 							continue;							
 						}
 
+
+						
+
 						//Accept and identify a connection 
 						SOCKET client = accept(ListenerSocket, nullptr, nullptr);
 
+
+
+						
+
+				     	// Conatiner to store incoming username
+						std::string userName;
+
+						// Since this is the first time a client is connectiing, the first message it will send is the Username
+						ReceiveMsg(client, userName);
+
+						auto iterator = m_clientMap.begin();
+						
+						bool usernameAlreadyExists = false;
+
+						while (iterator != m_clientMap.end())
+						{
+							if (iterator->second.userName == userName)
+							{
+								usernameAlreadyExists = true;
+								break;
+							}
+
+							iterator++;
+						}
+
+						if (usernameAlreadyExists)
+						{
+
+
+							//Tell the client that the connection is successful
+							std::string connectionMsg = "Username Already exists, please join with a different Name";
+							// Ackknowlege the connection by sending a welcome message to the client
+							SendMsg(client, serverData, connectionMsg);
+
+							continue;
+						}
+
+
+
+
 						//Add the connection to the list of sockets
 						FD_SET(client, &masterDesc);
-
 
 
 						//Tell the client that the connection is successful
@@ -162,11 +204,7 @@ namespace FanshaweGameEngine
 						// Ackknowlege the connection by sending a welcome message to the client
 						SendMsg(client, serverData, connectionMsg);
 
-						// Conatiner to store incoming username
-						std::string userName;
-
-						// Since this is the first time a client is connectiing, the first message it will send is the Username
-						ReceiveMsg(client, userName);
+						
 
 
 						ClientData data;
