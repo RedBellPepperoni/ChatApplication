@@ -6,7 +6,7 @@ Goals of the assignment : <br>
 
 > Create a Chat application using Winsock and TCP
 > 
-> Implement a Buffer Class that encodes/decodes ints using biglittle endian
+> Implement a Buffer Class that encodes/decodes 32bit unsigned Integers using BIG/LITTLE endian
 > 
 > The Buffer should also dynamically grow depending on teh message size
 > 
