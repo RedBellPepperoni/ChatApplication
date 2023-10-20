@@ -44,16 +44,28 @@ Extra Features Implemented : <br>
 
 
 
-## Multiple clients sending messgaes <br>
- ![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/multiclient.png)
- <br>
-
-## Server Side View <br>
- ![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/server.png)
+## Multiple clients sending messgaes 
+<br>
+<br>
 <br>
 
-## UserName Clash <br>
- ![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/UsernameClash.png)
+![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/multiclient.png)
+ <br>
+
+## Server Side View
+<br>
+<br>
+<br>
+
+![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/Server.png)
+<br>
+
+## UserName Clash 
+<br>
+<br>
+<br>
+
+![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/UsernameClash.png)
 
 
 
