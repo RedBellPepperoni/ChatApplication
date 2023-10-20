@@ -217,7 +217,7 @@ namespace FanshaweGameEngine
 
 						
 						// broadcast message to be sent to All other connected clients
-						std::string joinMsg = "[ " + userName + " has entered the Chat!! ]";
+						std::string joinMsg = "[ " + userName + " has entered the Room!! ]";
 						
 
 						// Loop Through all the sockets
@@ -266,7 +266,7 @@ namespace FanshaweGameEngine
 						{
 							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Grey));
 							// Close the client connection
-							finalMessage = " has left the Chat :(";
+							finalMessage = "[ " + data.userName + " has left the Room!! ]";
 							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 
 							// Clear the username and the socket bind
@@ -279,8 +279,23 @@ namespace FanshaweGameEngine
 							FD_CLR(sock, &masterDesc);
 
 							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Grey));
-							std::cout << "          [ " + data.userName + " has left the Chat!! ]" << std::endl;
+							std::cout << "           " << finalMessage << std::endl;
 							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
+
+
+							for (uint32_t i = 0; i < masterDesc.fd_count; i++)
+							{
+								SOCKET outSock = masterDesc.fd_array[i];
+
+								if (outSock != ListenerSocket)
+								{
+                                  	SendMsg(outSock, serverData, finalMessage);
+
+								}
+							}
+
+
+
 						}
 
 						else
@@ -296,32 +311,33 @@ namespace FanshaweGameEngine
 
 							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 
-						}
 
-
-						for (uint32_t i = 0; i < masterDesc.fd_count; i++)
-						{
-							SOCKET outSock = masterDesc.fd_array[i];
-
-							if (outSock != ListenerSocket)
+							for (uint32_t i = 0; i < masterDesc.fd_count; i++)
 							{
+								SOCKET outSock = masterDesc.fd_array[i];
+
+								if (outSock != ListenerSocket)
+								{
 
 
-								if (outSock == sock)
-								{	
-									//Uncomment this if you want delivery feedback
+									if (outSock == sock)
+									{
+										//Uncomment this if you want delivery feedback
 
 
-									////If the current socket is the one that sent the message:
-									//std::string msgSent = "Message delivered.";
+										////If the current socket is the one that sent the message:
+										//std::string msgSent = "Message delivered.";
 
-									//SendMsg(outSock, serverData, msgSent);
-								}
+										//SendMsg(outSock, serverData, msgSent);
+									}
 
-								else
-								{	//All other sockest should receive the msg 
+									else
+									{	//All other sockest should receive the msg 
 
-									SendMsg(outSock, data, finalMessage);
+										SendMsg(outSock, data, finalMessage);
+									}
+
+
 								}
 
 
@@ -329,6 +345,9 @@ namespace FanshaweGameEngine
 
 
 						}
+
+
+						
 
 
 
