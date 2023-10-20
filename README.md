@@ -19,7 +19,7 @@ Goals of the assignment : <br>
 
 <br>
 Extra Features Implemented : <br>
-
+<br>
 >
 > Replicated User Colors and Message colors
 > 
