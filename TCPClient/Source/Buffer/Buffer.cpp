@@ -1,5 +1,5 @@
 #include "Buffer.h"
-
+#include <iostream>
 
 namespace FanshaweGameEngine
 {
@@ -68,6 +68,13 @@ namespace FanshaweGameEngine
 				m_writeIndex++;
 			}
 		}
+
+		void Buffer::WriteString(const size_t index, const std::string msg)
+		{
+			m_writeIndex = index;
+			WriteString(msg);
+
+		}
 		
 
 		uint32_t Buffer::ReadUInt32(const size_t index)
@@ -108,7 +115,9 @@ namespace FanshaweGameEngine
 			if (size > m_buffer.size())
 			{// Growing the buffer
 
-				printf("Growing the Buffer");
+				SetConsoleTextAttribute(hConsole, Grey);
+				std::cout << "                [ Growing the Buffer ]          " << std::endl;
+				SetConsoleTextAttribute(hConsole, White);
 
 				m_buffer.resize(size);
 				

@@ -59,6 +59,8 @@ namespace FanshaweGameEngine
 
 		}
 
+		
+
 		void Buffer::WriteString(const std::string msg)
 		{
 
@@ -68,7 +70,15 @@ namespace FanshaweGameEngine
 				m_writeIndex++;
 			}
 		}
+
+		void Buffer::WriteString(const size_t index, const std::string msg)
+		{
+			m_writeIndex = index;
+			WriteString(msg);
+
+		}
 		
+
 
 		uint32_t Buffer::ReadUInt32(const size_t index)
 		{
@@ -111,9 +121,9 @@ namespace FanshaweGameEngine
 
 
 
-				SetConsoleTextAttribute(hConsole, debugAttrib);
+				SetConsoleTextAttribute(hConsole, Grey);
 				std::cout << "                [ Growing the Buffer ]          " << std::endl;
-
+				SetConsoleTextAttribute(hConsole, White);
 				m_buffer.resize(size);
 				
 			}

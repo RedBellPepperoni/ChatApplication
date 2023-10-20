@@ -23,7 +23,7 @@ namespace FanshaweGameEngine
 			void Connect();
 
 			void SendMsg(const std::string msgText);
-			int ReceiveMsg(SOCKET sock, std::string& decodedMessage);
+			int ReceiveMsg(SOCKET sock, int& colorAttrib, std::string& username, std::string& decodedMessage);
 
 			std::thread m_clientThread;
 			void ThreadReceive();
@@ -35,6 +35,8 @@ namespace FanshaweGameEngine
 			bool GetConnected() const;
 
 		private:
+
+			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 			SOCKET CreateSocket();
 
@@ -49,6 +51,10 @@ namespace FanshaweGameEngine
 			bool m_hasConnected = true;
 
 			struct addrinfo* info = nullptr;
+
+
+			int White = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN;
+
 
 			// Default Bugger is using Big Endian
 			Buffer m_buffer;
