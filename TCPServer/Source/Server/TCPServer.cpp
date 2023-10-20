@@ -51,9 +51,9 @@ namespace FanshaweGameEngine
 
 
 			// Winsock Intitialized successfully
-			SetConsoleTextAttribute(hConsole, 12);
+			SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Green));
 			std::cout << "Fanshawe Chat Server is Online!..." << std::endl;
-			SetConsoleTextAttribute(hConsole, messageAttrib);
+			SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 
 			return true;
 		}
@@ -73,179 +73,266 @@ namespace FanshaweGameEngine
 			SOCKET ListenerSocket = CreateSocket();
 
 
-			/*while (isRunning)
-			{*/
-
-				if (ListenerSocket == INVALID_SOCKET)
-				{
-					// Invalid handle, we exit here
-					return;
-				}
+			
+			if (ListenerSocket == INVALID_SOCKET)
+			{
+				// Invalid handle, we exit here
+				return;
+			}
 
 
-				// A file descriptor that stores all the data for all the sockkets
-				fd_set masterDesc;
+			// A file descriptor that stores all the data for all the sockkets
+			fd_set masterDesc;
 
-				// Clean up the masterDesc of garbage values/previous values;
-				FD_ZERO(&masterDesc);
+			// Clean up the masterDesc of garbage values/previous values;
+			FD_ZERO(&masterDesc);
 
-				// Binding the Lisner socket to the file descriptor
-				FD_SET(ListenerSocket, &masterDesc);
+			// Binding the Lisner socket to the file descriptor
+			FD_SET(ListenerSocket, &masterDesc);
 
 
+			ClientData serverData;
+
+			serverData.clientColor = Color::Grey;
+			serverData.userName = "Server";
 
 				// Loop
-				while (isRunning)
+			while (isRunning)
+			{
+				// Creating a copy, since the descriptor will get cleared everytime
+				fd_set copyDesc = masterDesc;
+				int socketCount = select(0, &copyDesc, nullptr, nullptr, nullptr);
+
+
+					
+
+				// Get msgs only from the specified sockets
+				for (int i = 0; i < socketCount; i++)
 				{
-					// Creating a copy, since the descriptor will get cleared everytime
-					fd_set copyDesc = masterDesc;
-					int socketCount = select(0, &copyDesc, nullptr, nullptr, nullptr);
 
 
-					// Get msgs only from the specified sockets
-					for (int i = 0; i < socketCount; i++)
+
+
+					// Looping through all the scokets that are active
+					SOCKET sock = copyDesc.fd_array[i];
+
+
+
+
+
+
+					// ============================= Accept a Connection ===================================
+					if (sock == ListenerSocket)
 					{
 						
 
-
-						// Looping through all the scokets that are active
-						SOCKET sock = copyDesc.fd_array[i];
-
-						// ============================= Accept a Connection ===================================
-						if (sock == ListenerSocket) 
+						if (masterDesc.fd_count > m_maxClients)
 						{
+							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Red));
 
-							//Accept and identify a connection 
+							std::cout << "MAX CLIENTS REACHED" << std::endl;
+							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
+
+							//Accept temporality tjust to inform client to try later
 							SOCKET client = accept(ListenerSocket, nullptr, nullptr);
-
-							//Add the connection to the list of sockets
-							FD_SET(client, &masterDesc);
-
+							
 							//Tell the client that the connection is successful
-							std::string connectionMsg = "Connected to Fanshawe Chat Server!!\n";
-							
+							std::string connectionMsg = "Maximun Users Reached, Try Later!!";
+
 							// Ackknowlege the connection by sending a welcome message to the client
-							SendMsg(client, connectionMsg);
+							SendMsg(client, serverData, connectionMsg);
 
-							// Conatiner to store incoming username
-							std::string userName;
+							//closesocket(client);
+							// Dont accept any more connections
 
-							// Since this is the first time a client is connectiing, the first message it will send is the Username
-							ReceiveMsg(client, userName);
-							
-							// Bind teh socket and username in the map
-							m_clientMap.emplace(client, userName);
-
-							SetConsoleTextAttribute(hConsole, debugAttrib);
-							// broadcast message to be sent to All other connected clients
-							std::string joinMsg ="          [ " + userName + " has entered the Chat!! ]";
-							SetConsoleTextAttribute(hConsole, messageAttrib);
-
-							// Loop Through all the sockets
-							for (uint32_t i = 0; i < masterDesc.fd_count; i++)
-							{
-								SOCKET outSock = masterDesc.fd_array[i];
-
-								if (outSock != ListenerSocket)
-								{
-									if (outSock != client)
-									{	
-										//All other sockest should receive the msg (except the one that is connecting)
-										SendMsg(outSock,joinMsg);
-									}
-								}	
-							}
-
-							// Output the messae on teh server terminal
-							std::cout << joinMsg << std::endl;
+							continue;							
 						}
 
-						//// ============================= Recieve a Message ===================================
-						else
+
+						
+
+						//Accept and identify a connection 
+						SOCKET client = accept(ListenerSocket, nullptr, nullptr);
+
+
+
+						
+
+				     	// Conatiner to store incoming username
+						std::string userName;
+
+						// Since this is the first time a client is connectiing, the first message it will send is the Username
+						ReceiveMsg(client, userName);
+
+						auto iterator = m_clientMap.begin();
+						
+						bool usernameAlreadyExists = false;
+
+						while (iterator != m_clientMap.end())
+						{
+							if (iterator->second.userName == userName)
+							{
+								usernameAlreadyExists = true;
+								break;
+							}
+
+							iterator++;
+						}
+
+						if (usernameAlreadyExists)
 						{
 
-							// Get the decodedMessage from the socket
-							const char* displaymsg;
-							std::string message;
-							std::string finalMessage;
 
-							// Store the username of the sending socket
-							std::string username = m_clientMap[sock];
+							//Tell the client that the connection is successful
+							std::string connectionMsg = "Username Already exists, please join with a different Name";
+							// Ackknowlege the connection by sending a welcome message to the client
+							SendMsg(client, serverData, connectionMsg);
 
-							// Receive the Length prefixed message and decode it
-							int bytesReceived = ReceiveMsg(sock, message);
-
-							// Add the username identifier to teh message before broadcasting
-							finalMessage = username + " : " + message;
+							continue;
+						}
 
 
-							// No message received ()
-							if (bytesReceived <= 0)
-							{
-								SetConsoleTextAttribute(hConsole, debugAttrib);
-								// Close the client connection
-								finalMessage = username + " has left the Chat :(";
-								SetConsoleTextAttribute(hConsole, messageAttrib);
 
-								// Clear the username and the socket bind
-								m_clientMap.erase(sock);
 
-								// close the disconnected socket
-								closesocket(sock);
+						//Add the connection to the list of sockets
+						FD_SET(client, &masterDesc);
 
-								//Remove connection from file discriptor
-								FD_CLR(sock, &masterDesc);	
 
-								SetConsoleTextAttribute(hConsole, debugAttrib);
-								std::cout << "          [ " + username + " has left the Chat!! ]" << std::endl;
-								SetConsoleTextAttribute(hConsole, messageAttrib);
-							}
+						//Tell the client that the connection is successful
+						std::string connectionMsg = "Connected to Fanshawe Chat Server!!";
 
-							else
-							{
-								// If time permits add user colors and stuff
-								SetConsoleTextAttribute(hConsole, senderAttrib);
-								std::cout << username << " : ";
-
-								SetConsoleTextAttribute(hConsole, messageAttrib);
-								std::cout << message << std::endl;
-
-							}
+						// Ackknowlege the connection by sending a welcome message to the client
+						SendMsg(client, serverData, connectionMsg);
 
 						
 
 
-							for (uint32_t i = 0; i < masterDesc.fd_count; i++)
+						ClientData data;
+
+						data.userName = userName;
+						data.clientColor = GetUnsedColor();
+
+						// Bind teh socket and username in the map
+						m_clientMap.emplace(client, data);
+
+						
+						// broadcast message to be sent to All other connected clients
+						std::string joinMsg = "[ " + userName + " has entered the Chat!! ]";
+						
+
+						// Loop Through all the sockets
+						for (uint32_t i = 0; i < masterDesc.fd_count; i++)
+						{
+							SOCKET outSock = masterDesc.fd_array[i];
+
+							if (outSock != ListenerSocket)
 							{
-								SOCKET outSock = masterDesc.fd_array[i];
-
-								if (outSock != ListenerSocket)
+								if (outSock != client)
 								{
+										//All other sockest should receive the msg (except the one that is connecting)
+										SendMsg(outSock, serverData, joinMsg);
+								}
+							}
+						}
+
+						SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Grey));
+						std::cout<< "           " << joinMsg << std::endl;
+						SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
+					}
+
+					//// ============================= Recieve a Message ===================================
+					else
+					{
+
+						// Get the decodedMessage from the socket
+						const char* displaymsg;
+						std::string message;
+						std::string finalMessage;
+
+						// Store the username of the sending socket
+						ClientData data = m_clientMap[sock];
 
 
-									if (outSock == sock)
-									{	//If the current socket is the one that sent the message:
-										std::string msgSent = "Message delivered.";
-										
-										SendMsg(outSock, msgSent);
-									}
+						
 
-									else
-									{	//All other sockest should receive the msg 
-
-										
-										SendMsg(outSock, finalMessage);
-									}
+						// Receive the Length prefixed message and decode it
+						int bytesReceived = ReceiveMsg(sock, message);
 
 
+						finalMessage = message;
+
+						// No message received ()
+						if (bytesReceived <= 0)
+						{
+							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Grey));
+							// Close the client connection
+							finalMessage = " has left the Chat :(";
+							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
+
+							// Clear the username and the socket bind
+							m_clientMap.erase(sock);
+
+							// close the disconnected socket
+							closesocket(sock);
+
+							//Remove connection from file discriptor
+							FD_CLR(sock, &masterDesc);
+
+							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Grey));
+							std::cout << "          [ " + data.userName + " has left the Chat!! ]" << std::endl;
+							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
+						}
+
+						else
+						{
+							// If time permits add user colors and stuff
+							SetConsoleTextAttribute(hConsole, GetColorAttrib(data.clientColor));
+							std::cout << data.userName << " : ";
+
+
+							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
+
+							std::cout << message << std::endl;
+
+							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
+
+						}
+
+
+						for (uint32_t i = 0; i < masterDesc.fd_count; i++)
+						{
+							SOCKET outSock = masterDesc.fd_array[i];
+
+							if (outSock != ListenerSocket)
+							{
+
+
+								if (outSock == sock)
+								{	
+									//Uncomment this if you want delivery feedback
+
+
+									////If the current socket is the one that sent the message:
+									//std::string msgSent = "Message delivered.";
+
+									//SendMsg(outSock, serverData, msgSent);
 								}
 
-								//if()
+								else
+								{	//All other sockest should receive the msg 
+
+									SendMsg(outSock, data, finalMessage);
+								}
+
+
 							}
 
-							//std::cout << message << std::endl;				//Log the message on the server side. 
 
-							
+						}
+
+
+
+
 
 						}
 					}
@@ -254,31 +341,62 @@ namespace FanshaweGameEngine
 				}
 
 
-
+			
 		}
 
-		void TCPServer::SendMsg(SOCKET sock, const std::string message)
+		void TCPServer::SendMsg(SOCKET sock, const ClientData data, const std::string message)
 		{
+			// Dont do anything if this is the case
 			if (message.empty() || sock == INVALID_SOCKET)
 			{
 				return;
 			}
 
-			// getiign teh length for Length prefising
-			size_t length = message.length();
+			// geting teh length for Length prefising
+
+			// here the Messgae encoding goes like this: 
+			/*
+			
+				Message has 5 parts
+				TotalLength       = [TL] uint32_t
+				ColorCode         = [C]  uint8_t
+				Username length   = [UL] uint8_t : usernames shouldn't be more than 256 caracters anyways
+				UsernameString    = [UStr] string
+				Messgae		      = [Msg] string
+				Message Format
+
+				 [TL]      [C]       [UL]      [Ustr]
+ 		      (4 bytes)  (1 byte)   (1 byte)     		
+
+
+
+			*/
+
+			
+			size_t totallength = 4 + 1 + 1 + data.userName.length() + message.length();
 
 			m_buffer.ClearBuffer();
 
-			m_buffer.WriteUInt32(length);
 
+			// Writing teh total length
+			m_buffer.WriteUInt32(totallength);
 
+			// Write the Color data at the fifth slot
+			m_buffer.Get()[4] = GetColorAttrib(data.clientColor);
+
+			// Write the length of the username at the 6th index [typecasting to char justin case]
+			m_buffer.Get()[5] = (char)data.userName.length();
+
+			// Atach the username
+			m_buffer.WriteString(6,data.userName);
+
+			// Finally add the actual message
 			m_buffer.WriteString(message);
-
 
 			const char* bufferText = m_buffer.Get();
 
 
-			send(sock, bufferText, length + 4, 0);
+			send(sock, bufferText, totallength, 0);
 
 		}
 
@@ -317,7 +435,10 @@ namespace FanshaweGameEngine
 			// Socket is still invalid, so we just quit 
 			if (ListenerSocket == INVALID_SOCKET)
 			{
+
+				SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Red));
 				printf("socket failed with error %d\n", WSAGetLastError());
+				SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 				freeaddrinfo(info);
 
 				return INVALID_SOCKET;
@@ -327,7 +448,9 @@ namespace FanshaweGameEngine
 			result = bind(ListenerSocket, info->ai_addr, (int)info->ai_addrlen);
 			if (result == SOCKET_ERROR) 
 			{
+				SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Red));
 				printf("bind failed with error %d\n", WSAGetLastError());
+				SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 				closesocket(ListenerSocket);
 				freeaddrinfo(info);
 				WSACleanup();
@@ -341,7 +464,9 @@ namespace FanshaweGameEngine
 			result = listen(ListenerSocket, SOMAXCONN);
 
 			if (result == SOCKET_ERROR) {
+				SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Red));
 				printf("listen failed with error %d\n", WSAGetLastError());
+				SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 				closesocket(ListenerSocket);
 				freeaddrinfo(info);
 				WSACleanup();
@@ -350,6 +475,31 @@ namespace FanshaweGameEngine
 
 	
 			return ListenerSocket;
+		}
+
+		Color TCPServer::GetUnsedColor()
+		{
+			Color color = Color::White;
+
+
+			auto iterator = m_ColorChart.begin();
+
+			while (iterator != m_ColorChart.end())
+			{
+				if (iterator->second == false)
+				{
+					color = iterator->first;
+					break;
+				}
+
+				iterator++;
+			}
+			
+			// Making sure we set in use
+			m_ColorChart[color] = true;
+
+
+			return color;
 		}
 
 		int TCPServer::ReceiveMsg(SOCKET socket, std::string& decodedmessage)

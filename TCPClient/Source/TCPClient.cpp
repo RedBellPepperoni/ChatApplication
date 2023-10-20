@@ -2,6 +2,8 @@
 #include <iostream>
 #include <sstream>
 
+
+
 namespace FanshaweGameEngine
 {
 	namespace Network
@@ -98,9 +100,29 @@ namespace FanshaweGameEngine
 			
 		}
 
-		int TCPClient::ReceiveMsg(SOCKET sock, std::string& decodedMessage)
+		int TCPClient::ReceiveMsg(SOCKET sock, int& colorAttrib, std::string& username, std::string& decodedMessage)
 		{
 			m_buffer.ClearBuffer();
+
+
+			// Message Format from teh server
+			/*
+
+				Message has 5 parts
+				TotalLength       = [TL] uint32_t
+				ColorCode         = [C]  uint8_t
+				Username length   = [UL] uint8_t : usernames shouldn't be more than 256 caracters anyways
+				UsernameString    = [UStr] string
+				Messgae		      = [Msg] string
+				Message Format
+
+				 [TL]      [C]       [UL]      [Ustr]
+			  (4 bytes)  (1 byte)   (1 byte)
+
+
+
+			*/
+
 
 			// Get the First 4 bytes to get the message length (LENGTH PREFIXING)
 			int bytesReceived = recv(sock, m_buffer.Get(), 4, 0);
@@ -120,10 +142,32 @@ namespace FanshaweGameEngine
 			// Growing the Buffer if needed
 			m_buffer.ResizeBuffer(messageLength);
 
-			// Getting the rest of he message
+			// Getting the rest of the message
 			bytesReceived = recv(sock, m_buffer.Get(), messageLength, 0);
 
-			decodedMessage = std::string(m_buffer.Get(), 0, bytesReceived);
+			// First Element After the refreshed buffer is the ColorAttrib
+			colorAttrib = m_buffer.Get()[0];
+
+			// the Char after teh color is teh length of teh username
+			int usernameLength = m_buffer.Get()[1];
+
+			std::string senderusername(usernameLength, 'x');
+
+			// get teh Username
+			for (int i = 0; i < usernameLength; i++)
+			{
+
+				int offsetIndex = i + 2;
+				senderusername[i] = m_buffer.Get()[offsetIndex];
+
+
+			}
+
+			username = senderusername;
+
+
+
+			decodedMessage = std::string(m_buffer.Get(), (1+1+usernameLength), bytesReceived - (1 + 1 + usernameLength));
 
 			return bytesReceived;
 		}
@@ -135,15 +179,24 @@ namespace FanshaweGameEngine
 			while (m_threadRunning)
 			{
 				std::string message;
-				int bytesReceived = ReceiveMsg(m_serverSocket, message);
+				std::string username;
+				int color;
+				int bytesReceived = ReceiveMsg(m_serverSocket,color,username, message);
 
 				if (bytesReceived > 0)
 				{
+					SetConsoleTextAttribute(hConsole, color);
+					std::cout << username << " : ";
+
+					SetConsoleTextAttribute(hConsole, White);
 					std::cout << message << std::endl;
+
 				}
 				else
 				{
+					SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
 					std::cout << " Server Doesnt Exist " << std::endl;
+					SetConsoleTextAttribute(hConsole, White);
 					m_threadRunning = false;
 					
 				}

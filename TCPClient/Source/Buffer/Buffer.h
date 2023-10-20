@@ -2,6 +2,9 @@
 #include <vector>
 #include <string>
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 namespace FanshaweGameEngine
 {
 
@@ -24,6 +27,7 @@ namespace FanshaweGameEngine
 			void WriteUInt32(const size_t index, const uint32_t value);
 			void WriteUInt32(const uint32_t value);
 			void WriteString(const std::string msg);
+			void WriteString(const size_t index, const std::string msg);
 
 			uint32_t ReadUInt32(const size_t index);
 			uint32_t ReadUInt32();
@@ -49,6 +53,12 @@ namespace FanshaweGameEngine
 
 			// Default Big Endian
 			Endianness currentEndianness = Endianness::BIG_ENDIAN;
+
+			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			// Grey color
+			const int Grey = FOREGROUND_INTENSITY;
+			const int White = FOREGROUND_INTENSITY;
 
 		};
 	}
