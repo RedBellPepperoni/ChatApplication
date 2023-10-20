@@ -2,7 +2,7 @@
 
 Term-1 : Assignment to create an Server Client Chat Application  <br>
 <br>
-Goals of the assignment: <br.
+Goals of the assignment: <br>
 
 > Create a Chat application using Winsock and TCP
 > Implement a Buffer Class that encodes/decodes ints using biglittle endian
