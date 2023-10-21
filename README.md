@@ -70,5 +70,24 @@ Extra Features Implemented : <br>
 
 ![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/UsernameClash.png)
 
+# MESSAGE FORMATS
+<br>
 
+## Client Format
+
+> The client sends Raw messages with length prefixing to the server
+
+<br>
+
+
+![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/ClientMsg.png)
+
+<br>
+## Client Message
+
+> The server sends the cleint color, clientusername length, client username and  messages with length prefixing to the clients
+
+<br>
+
+![](https://github.com/RedBellPepperoni/ChatApplication/blob/main/serverMsg.png)
 
