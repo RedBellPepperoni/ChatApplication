@@ -8,7 +8,8 @@ Goals of the assignment : <br>
 > 
 > Implement a Buffer Class that encodes/decodes 32bit unsigned Integers using BIG/LITTLE endian
 > 
-> The Buffer should also dynamically grow depending on teh message size
+> The Buffer should also dynamically grow depending on the message size
+> [Currently the buffer is set to 16 bytes just to show the growing process]
 > 
 > Have a custom protocol with Length prefixing
 > 
@@ -23,11 +24,13 @@ Extra Features Implemented : <br>
 
 
 > Replicated User Colors and Message colors
+> [The server will assign colors to the client making sure no two clients have the same color]
 > 
 > Max connection limit (any connection after that get feedback msg from the server saying server Full)
+> [Currently Max client is set to 10 concurrent clients, that is changable in the code]
 > 
 > Username Clash check (Two client wont have same username)
-> 
+>
 
  ### Installation notes : <br>
 
