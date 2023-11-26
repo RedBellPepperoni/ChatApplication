@@ -1,82 +1,15 @@
 #pragma once
 #include <string>
-#include "Buffer/Buffer.h"
-
 #include <map>
-#include <WS2tcpip.h>
-#pragma comment (lib, "ws2_32.lib")
 
+#include "Auth/AuthService.h"
 
 
 namespace FanshaweGameEngine
 {
 	namespace Network
 	{
-		enum Color : char
-		{
-			Yellow, //0
-			Blue,
-			Green,
-			Red,
-			Purple,
-			LightYellow,
-			LightBlue,
-			LightRed,
-			BlueGreen,
-			Magenta,
-
-			LightGreen, // The Extra Color
-
-			White, // Default Message Color
-			Grey // Debug Color
-
-		};
-
-
-
-		static uint8_t GetColorAttrib(const Color color)
-		{
-			switch (color)
-			{
-			case FanshaweGameEngine::Network::Blue: return FOREGROUND_BLUE;
-				break;
-			case FanshaweGameEngine::Network::Green: return FOREGROUND_GREEN;
-				break;
-			case FanshaweGameEngine::Network::BlueGreen: return (FOREGROUND_BLUE | FOREGROUND_GREEN);
-				break;
-			case FanshaweGameEngine::Network::Red: return FOREGROUND_RED;
-				break;
-			case FanshaweGameEngine::Network::Purple: return (FOREGROUND_RED | FOREGROUND_BLUE);
-				break;
-			case FanshaweGameEngine::Network::Yellow:  return (FOREGROUND_RED | FOREGROUND_GREEN);
-				break;
-			case FanshaweGameEngine::Network::LightYellow: return (Color::Yellow | FOREGROUND_INTENSITY);
-				break;
-			case FanshaweGameEngine::Network::LightBlue: return (Color::Blue | FOREGROUND_INTENSITY);
-				break;
-			case FanshaweGameEngine::Network::LightRed: return (Color::Red | FOREGROUND_INTENSITY);
-				break;
-			case FanshaweGameEngine::Network::Magenta:return (Color::Purple | FOREGROUND_INTENSITY);
-				break;
-			case FanshaweGameEngine::Network::LightGreen: return (Color::Green | FOREGROUND_INTENSITY);
-				break;
-			case FanshaweGameEngine::Network::White:  return (FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN);
-				break;
-			case FanshaweGameEngine::Network::Grey: return  FOREGROUND_INTENSITY;
-				break;
-			default: return Color::Red | Color::Blue | Color::Green;
-				break;
-			}
-		}
-
-
-
-		struct ClientData
-		{
-			Color clientColor;
-			std::string userName;
-		};
-
+		
 
 		class TCPServer
 		{
@@ -95,7 +28,7 @@ namespace FanshaweGameEngine
 			void Run();
 
 			// For some reason SendMessage is defined in windows 
-			void SendMsg(SOCKET sock, const ClientData data,const std::string message);
+			void SendMsg(SOCKET sock, const ProtoManager::TCPPacket& packetdata);
 
 
 
@@ -113,9 +46,7 @@ namespace FanshaweGameEngine
 			std::string m_serverIPaddress;
 			uint32_t m_serverPort;
 
-			// The buffer that is used to send and receive and decode/encode data
-			Buffer m_buffer;
-
+			
 
 			// Check to make sure the server is running
 			bool isRunning = false;
