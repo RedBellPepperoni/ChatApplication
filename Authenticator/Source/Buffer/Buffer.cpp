@@ -84,11 +84,10 @@ namespace FanshaweGameEngine
 		{
 			std::string outData = std::string();
 
-			
 
 			for (int i = 0; i < count; i++)
 			{
-				outData[i] = m_buffer[i];
+				outData += m_buffer[i];
 			}
 
 			outData;

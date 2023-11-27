@@ -168,11 +168,13 @@ namespace FanshaweGameEngine
 
 							authService.CreateAccount(clientsocket, clientData);
 
-							//authService.AuthenticateUser(clientsocket, clientData);
+							//
 
 							break;
 						
 						case MessageType::Authenticate:
+
+							authService.AuthenticateUser(clientsocket, clientData);
 
 							break;
 
@@ -314,8 +316,7 @@ namespace FanshaweGameEngine
 						int bytesReceived = protocolmanager->ReceiveProtoMessage(sock, data);
 
 
-						finalMessage = message;
-
+						
 						// No message received ()
 						if (bytesReceived <= 0)
 						{
@@ -362,7 +363,7 @@ namespace FanshaweGameEngine
 
 							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 
-							std::cout << message << std::endl;
+							std::cout << data.message << std::endl;
 
 							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 
@@ -389,7 +390,7 @@ namespace FanshaweGameEngine
 									else
 									{	//All other sockest should receive the msg 
 
-										protocolmanager->SendProtoMessage(outSock, serverData);
+										protocolmanager->SendProtoMessage(outSock, data);
 									}
 
 

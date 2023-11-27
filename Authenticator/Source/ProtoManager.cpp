@@ -46,10 +46,10 @@ int ProtoManager::Serialize(const TCPPacket& packetdata)
 
 	std::string serializedData = protoPacket.SerializeAsString();
 
-	std::cout << "Encoded :" << serializedData << std::endl;
+	//std::cout << "Encoded :" << serializedData << std::endl;
 
 	uint32_t count = serializedData.length();
-	std::cout << "Count Before:" << count << std::endl;
+	//std::cout << "Count Before:" << count << std::endl;
 
 	m_buffer->WriteUInt32(count);
 	m_buffer->WriteString(serializedData);
@@ -63,7 +63,7 @@ ProtoManager::TCPPacket ProtoManager::Deserialize(std::string messageToDeseriali
 {
 	TCPPacket data;
 
-	std::cout << "Recieved :" << messageToDeserialize.length() << std::endl;
+	//std::cout << "Recieved :" << messageToDeserialize.length() << std::endl;
 
 	
 
@@ -114,20 +114,21 @@ bool ProtoManager::ReceiveProtoMessage(SOCKET sock, TCPPacket& receivedData)
 	uint32_t msgLength = m_buffer->ReadUInt32();
 
 	
-	m_buffer->ResizeBuffer(msgLength);
 	m_buffer->ClearBuffer();
-
+	m_buffer->ResizeBuffer(msgLength);
+	
 
 	recv(sock, m_buffer->Get(), msgLength, 0);
 
 
+	
 
-	std::string data(m_buffer->Get());
+	std::string data = m_buffer->GetString(msgLength);
 
-	if (data.length() > msgLength)
-	{
-		data = data.substr(0, msgLength);
-	}
+	//if (data.length() > msgLength)
+	//{
+	//	data = data.substr(0, msgLength);
+	//}
 
 
 	

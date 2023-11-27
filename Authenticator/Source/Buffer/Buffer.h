@@ -42,6 +42,8 @@ namespace FanshaweGameEngine
 
 			size_t GetLength() const { return m_buffer.size(); }
 			
+			const char* GetData() { return m_buffer.data(); };
+
 			char* Get()
 			{ 
 				// getting the adress of teh first eleemnt of the vector buffer
