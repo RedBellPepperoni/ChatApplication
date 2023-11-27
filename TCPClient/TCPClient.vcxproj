@@ -72,9 +72,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)Source/;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)\Authenticator\Source\;$(SolutionDir)\External\;$(SolutionDir)\External\mysql\include\;$(SolutionDir)External\google\protobuf\;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir)Source/;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)\Authenticator\Source\;$(SolutionDir)\External\;$(SolutionDir)\External\mysql\include\;$(SolutionDir)External\google\protobuf\;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -114,6 +116,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Authenticator.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\;$(SolutionDir)External\mysql\libs\$(Configuration)\;$(SolutionDir)External\google\libs\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -130,14 +134,14 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Authenticator.lib;libprotobuf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\;$(SolutionDir)External\mysql\libs\$(Configuration)\;$(SolutionDir)External\google\libs\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Buffer\Buffer.h" />
     <ClInclude Include="Source\TCPClient.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Buffer\Buffer.cpp" />
     <ClCompile Include="Source\TCPClient.cpp" />
     <ClCompile Include="Source\clientMain.cpp" />
   </ItemGroup>

@@ -18,18 +18,12 @@
     <ClInclude Include="Source\TCPClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Buffer\Buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\TCPClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\clientMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Buffer\Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

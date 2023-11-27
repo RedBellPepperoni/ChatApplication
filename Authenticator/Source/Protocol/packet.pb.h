@@ -214,7 +214,7 @@ class Packet final :
   std::string* _internal_mutable_username();
   public:
 
-  // required bytes data = 4;
+  // required string data = 4;
   bool has_data() const;
   private:
   bool _internal_has_data() const;
@@ -245,7 +245,7 @@ class Packet final :
   void _internal_set_messagetype(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // required int32 color = 2;
+  // optional int32 color = 2;
   bool has_color() const;
   private:
   bool _internal_has_color() const;
@@ -315,7 +315,7 @@ inline void Packet::set_messagetype(::PROTOBUF_NAMESPACE_ID::int32 value) {
   // @@protoc_insertion_point(field_set:packet.Packet.messageType)
 }
 
-// required int32 color = 2;
+// optional int32 color = 2;
 inline bool Packet::_internal_has_color() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
@@ -401,7 +401,7 @@ inline void Packet::set_allocated_username(std::string* username) {
   // @@protoc_insertion_point(field_set_allocated:packet.Packet.username)
 }
 
-// required bytes data = 4;
+// required string data = 4;
 inline bool Packet::_internal_has_data() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
@@ -421,7 +421,7 @@ template <typename ArgT0, typename... ArgT>
 inline PROTOBUF_ALWAYS_INLINE
 void Packet::set_data(ArgT0&& arg0, ArgT... args) {
  _has_bits_[0] |= 0x00000002u;
- data_.SetBytes(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+ data_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
   // @@protoc_insertion_point(field_set:packet.Packet.data)
 }
 inline std::string* Packet::mutable_data() {

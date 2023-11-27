@@ -62,6 +62,8 @@ namespace FanshaweGameEngine
 		void Buffer::WriteString(const std::string msg)
 		{
 
+			
+
 			for (int i = 0; i < msg.length(); i++)
 			{
 				m_buffer[m_writeIndex] = msg[i];
@@ -72,8 +74,26 @@ namespace FanshaweGameEngine
 		void Buffer::WriteString(const size_t index, const std::string msg)
 		{
 			m_writeIndex = index;
+
+			//ResizeBuffer(msg.length() + index);
 			WriteString(msg);
 
+		}
+
+		std::string Buffer::GetString(int count)
+		{
+			std::string outData = std::string();
+
+			
+
+			for (int i = 0; i < count; i++)
+			{
+				outData[i] = m_buffer[i];
+			}
+
+			outData;
+
+			return outData;
 		}
 		
 
@@ -107,6 +127,7 @@ namespace FanshaweGameEngine
 			m_writeIndex = 0;
 			m_readIndex = 0;
 			std::fill(m_buffer.begin(), m_buffer.end(), 0);
+			//m_buffer.clear();
 		}
 
 

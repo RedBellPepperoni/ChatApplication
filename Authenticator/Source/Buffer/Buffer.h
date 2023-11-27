@@ -29,6 +29,8 @@ namespace FanshaweGameEngine
 			void WriteString(const std::string msg);
 			void WriteString(const size_t index, const std::string msg);
 
+			std::string GetString(int count);
+
 			uint32_t ReadUInt32(const size_t index);
 			uint32_t ReadUInt32();
 
@@ -37,6 +39,8 @@ namespace FanshaweGameEngine
 
 			void ClearBuffer();
 			void ResizeBuffer(const uint32_t size);
+
+			size_t GetLength() const { return m_buffer.size(); }
 			
 			char* Get()
 			{ 

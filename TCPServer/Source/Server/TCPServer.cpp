@@ -1,5 +1,6 @@
 #include "TCPServer.h"
 #include <iostream>
+#include "ProtoManager.h"
 
 namespace FanshaweGameEngine
 {
@@ -13,11 +14,14 @@ namespace FanshaweGameEngine
 			
 		{
 			
+			protocolmanager = new ProtoManager();
+
 		}
 
 		TCPServer::TCPServer(const uint32_t port)
 		{
 			m_serverPort = port;
+			protocolmanager = new ProtoManager();
 		}
 
 
@@ -25,29 +29,23 @@ namespace FanshaweGameEngine
 		TCPServer::~TCPServer()
 		{
 			WSACleanup();
+			delete protocolmanager;
 		}
 
 
 		bool TCPServer::Init()
 		{
-			// Init thge Winsock
-			// Container for the winsock data
-			WSADATA data;
-			// Version definition
-			WORD version = MAKEWORD(2, 2);
-
-			// Initialize and startup the Winsock
-			int winsockInit = WSAStartup(version, &data);
-
-			//  The WSAStartup failed miserably :(
-			if (winsockInit != 0)
-			{
-				printf("WSAStartup failed with error %d\n", winsockInit);
-				return false;
-			}
+			
 
 			// Setting Endianness to Big endian
 			//m_buffer.SetEndian(Buffer::Endianness::BIG_ENDIAN);
+
+			bool init = protocolmanager->Init();
+
+			if (!init)
+			{
+				return false;
+			}
 
 
 			// Winsock Intitialized successfully
@@ -89,11 +87,10 @@ namespace FanshaweGameEngine
 
 			// Binding the Lisner socket to the file descriptor
 			FD_SET(ListenerSocket, &masterDesc);
+			ProtoManager::TCPPacket serverData;
 
 
-			ClientData serverData;
-
-			serverData.clientColor = Color::Grey;
+			serverData.color = Color::Grey;
 			serverData.userName = "Server";
 
 				// Loop
@@ -104,13 +101,9 @@ namespace FanshaweGameEngine
 				int socketCount = select(0, &copyDesc, nullptr, nullptr, nullptr);
 
 
-					
-
 				// Get msgs only from the specified sockets
 				for (int i = 0; i < socketCount; i++)
 				{
-
-
 
 
 					// Looping through all the scokets that are active
@@ -118,14 +111,10 @@ namespace FanshaweGameEngine
 
 
 
-
-
-
 					// ============================= Accept a Connection ===================================
 					if (sock == ListenerSocket)
 					{
 						
-
 						if (masterDesc.fd_count > m_maxClients)
 						{
 							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Red));
@@ -137,12 +126,14 @@ namespace FanshaweGameEngine
 							SOCKET client = accept(ListenerSocket, nullptr, nullptr);
 							
 							//Tell the client that the connection is successful
-							std::string connectionMsg = "Maximun Users Reached, Try Later!!";
+							serverData.message = "Maximun Users Reached, Try Later!!";
+							serverData.type = MessageType::ChatMessage;
+							serverData.color = Color::Red;
 
 							// Ackknowlege the connection by sending a welcome message to the client
-							SendMsg(client, serverData, connectionMsg);
+							protocolmanager->SendProtoMessage(client,serverData);
 
-							//closesocket(client);
+							closesocket(client);
 							// Dont accept any more connections
 
 							continue;							
@@ -152,73 +143,95 @@ namespace FanshaweGameEngine
 						
 
 						//Accept and identify a connection 
-						SOCKET client = accept(ListenerSocket, nullptr, nullptr);
-
-
-
-						
-
-				     	// Conatiner to store incoming username
-						std::string userName;
+						SOCKET clientsocket = accept(ListenerSocket, nullptr, nullptr);
+	
 
 						// Since this is the first time a client is connectiing, the first message it will send is the Username
-						ReceiveMsg(client, userName);
+						//ReceiveMsg(client, userName);
 
-						auto iterator = m_clientMap.begin();
+
+						ProtoManager::TCPPacket clientData;
+
+
+						protocolmanager->ReceiveProtoMessage(clientsocket, clientData);
 						
-						bool usernameAlreadyExists = false;
 
-						while (iterator != m_clientMap.end())
-						{
-							if (iterator->second.userName == userName)
-							{
-								usernameAlreadyExists = true;
-								break;
-							}
 
-							iterator++;
-						}
+						clientData;
 
-						if (usernameAlreadyExists)
+						switch (clientData.type)
 						{
 
+						case MessageType::CreateAccount:
 
-							//Tell the client that the connection is successful
-							std::string connectionMsg = "Username Already exists, please join with a different Name";
-							// Ackknowlege the connection by sending a welcome message to the client
-							SendMsg(client, serverData, connectionMsg);
+							break;
+						
+						case MessageType::Authenticate:
 
-							continue;
+							break;
+
+						case MessageType::ChatMessage:
+
+							break;
+
+						default:
+							break;
 						}
 
 
+
+						//auto iterator = m_clientMap.begin();
+						//
+						//bool usernameAlreadyExists = false;
+
+						//while (iterator != m_clientMap.end())
+						//{
+						//	if (iterator->second.userName == userName)
+						//	{
+						//		usernameAlreadyExists = true;
+						//		break;
+						//	}
+
+						//	iterator++;
+						//}
+
+						//if (usernameAlreadyExists)
+						//{
+
+
+						//	//Tell the client that the connection is successful
+						//	std::string connectionMsg = "Username Already exists, please join with a different Name";
+						//	// Ackknowlege the connection by sending a welcome message to the client
+						//	SendMsg(client, serverData);
+
+						//	continue;
+						//}
 
 
 						//Add the connection to the list of sockets
-						FD_SET(client, &masterDesc);
+						FD_SET(clientsocket, &masterDesc);
 
 
 						//Tell the client that the connection is successful
-						std::string connectionMsg = "Connected to Fanshawe Chat Server!!";
+						serverData.message = "Connected to Fanshawe Chat Server!!";
+						serverData.type = MessageType::ChatMessage;
 
 						// Ackknowlege the connection by sending a welcome message to the client
-						SendMsg(client, serverData, connectionMsg);
+						//SendMsg(clientsockt, serverData);
+
+						protocolmanager->SendProtoMessage(clientsocket, serverData);
+
 
 						
+						clientData.color = GetUnsedColor();
 
-
-						ClientData data;
-
-						data.userName = userName;
-						data.clientColor = GetUnsedColor();
-
-						// Bind teh socket and username in the map
-						m_clientMap.emplace(client, data);
+						//// Bind teh socket and username in the map
+						//m_clientMap.emplace(client, data);
 
 						
 						// broadcast message to be sent to All other connected clients
-						std::string joinMsg = "[ " + userName + " has entered the Room!! ]";
-						
+						serverData.message = "[ " + clientData.userName + " has entered the Room!! ]";
+						serverData.type = MessageType::ChatMessage;
 
 						// Loop Through all the sockets
 						for (uint32_t i = 0; i < masterDesc.fd_count; i++)
@@ -227,16 +240,16 @@ namespace FanshaweGameEngine
 
 							if (outSock != ListenerSocket)
 							{
-								if (outSock != client)
+								if (outSock != clientsocket)
 								{
 										//All other sockest should receive the msg (except the one that is connecting)
-										SendMsg(outSock, serverData, joinMsg);
+										protocolmanager->SendProtoMessage(outSock, serverData);
 								}
 							}
 						}
 
 						SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::Grey));
-						std::cout<< "           " << joinMsg << std::endl;
+						std::cout<< "           " << serverData.message << std::endl;
 						SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 					}
 
@@ -249,14 +262,50 @@ namespace FanshaweGameEngine
 						std::string message;
 						std::string finalMessage;
 
+
+						//switch (MessageType)
+						//{
+
+						//case MessageType::CreateAccount:
+
+						//	break;
+						//case MessageType::CreateSuccess:
+
+						//	break;
+						//case MessageType::CreateFailure:
+
+						//	break;
+						//case MessageType::Authenticate:
+
+						//	break;
+						//case MessageType::AuthenticateSuccess:
+
+						//	break;
+						//case MessageType::AuthenticateFailure:
+
+						//	break;
+						//case MessageType::ChatMessage:
+
+						//	break;
+						//default:
+						//	break;
+						//}
+
+
+
 						// Store the username of the sending socket
-						ClientData data = m_clientMap[sock];
+						//ProtoManager::TCPPacket data = m_clientMap[sock];
 
 
+
+
+						// Get Client data from Database here
+
+						ProtoManager::TCPPacket data;
 						
 
 						// Receive the Length prefixed message and decode it
-						int bytesReceived = ReceiveMsg(sock, message);
+						int bytesReceived = protocolmanager->ReceiveProtoMessage(sock, data);
 
 
 						finalMessage = message;
@@ -269,8 +318,8 @@ namespace FanshaweGameEngine
 							finalMessage = "[ " + data.userName + " has left the Room!! ]";
 							SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 
-							// Clear the username and the socket bind
-							m_clientMap.erase(sock);
+							//// Clear the username and the socket bind
+							//m_clientMap.erase(sock);
 
 							// close the disconnected socket
 							closesocket(sock);
@@ -289,7 +338,7 @@ namespace FanshaweGameEngine
 
 								if (outSock != ListenerSocket)
 								{
-                                  	SendMsg(outSock, serverData, finalMessage);
+                                  	protocolmanager->SendProtoMessage(outSock, serverData);
 
 								}
 							}
@@ -301,7 +350,7 @@ namespace FanshaweGameEngine
 						else
 						{
 							// If time permits add user colors and stuff
-							SetConsoleTextAttribute(hConsole, GetColorAttrib(data.clientColor));
+							SetConsoleTextAttribute(hConsole, GetColorAttrib(data.color));
 							std::cout << data.userName << " : ";
 
 
@@ -334,7 +383,7 @@ namespace FanshaweGameEngine
 									else
 									{	//All other sockest should receive the msg 
 
-										SendMsg(outSock, data, finalMessage);
+										protocolmanager->SendProtoMessage(outSock, serverData);
 									}
 
 
@@ -363,61 +412,62 @@ namespace FanshaweGameEngine
 			
 		}
 
-		void TCPServer::SendMsg(SOCKET sock, const ClientData data, const std::string message)
-		{
-			// Dont do anything if this is the case
-			if (message.empty() || sock == INVALID_SOCKET)
-			{
-				return;
-			}
+		//void TCPServer::SendMsg(SOCKET sock, const ProtoManager::TCPPacket& packetdata)
+		//{
+		//	// Dont do anything if this is the case
+		//	if (packetdata.message.empty() || sock == INVALID_SOCKET)
+		//	{
+		//		return;
+		//	}
 
-			// geting teh length for Length prefising
+		//	// geting teh length for Length prefising
 
-			// here the Messgae encoding goes like this: 
-			/*
-			
-				Message has 5 parts
-				TotalLength       = [TL] uint32_t
-				ColorCode         = [C]  uint8_t
-				Username length   = [UL] uint8_t : usernames shouldn't be more than 256 caracters anyways
-				UsernameString    = [UStr] string
-				Messgae		      = [Msg] string
-				Message Format
+		//	// here the Messgae encoding goes like this: 
+		//	/*
+		//	
+		//		Message has 5 parts
+		//		TotalLength       = [TL] uint32_t
+		//		ColorCode         = [C]  uint8_t
+		//		Username length   = [UL] uint8_t : usernames shouldn't be more than 256 caracters anyways
+		//		UsernameString    = [UStr] string
+		//		Messgae		      = [Msg] string
+		//		Message Format
 
-				 [TL]      [C]       [UL]      [Ustr]
- 		      (4 bytes)  (1 byte)   (1 byte)     		
-
-
-
-			*/
-
-			
-			size_t totallength = 4 + 1 + 1 + data.userName.length() + message.length();
-
-			m_buffer.ClearBuffer();
+		//		 [TL]      [C]       [UL]      [Ustr]
+ 	//	      (4 bytes)  (1 byte)   (1 byte)     		
 
 
-			// Writing teh total length
-			m_buffer.WriteUInt32(totallength);
 
-			// Write the Color data at the fifth slot
-			m_buffer.Get()[4] = GetColorAttrib(data.clientColor);
+		//	*/
 
-			// Write the length of the username at the 6th index [typecasting to char justin case]
-			m_buffer.Get()[5] = (char)data.userName.length();
+		//	
+		//	size_t totallength = 4 + 1 + 1 + packetdata.userName.length() + packetdata.message.length();
 
-			// Atach the username
-			m_buffer.WriteString(6,data.userName);
-
-			// Finally add the actual message
-			m_buffer.WriteString(message);
-
-			const char* bufferText = m_buffer.Get();
+		//	//m_buffer.ClearBuffer();
 
 
-			send(sock, bufferText, totallength, 0);
+		//	////// Writing thh total length
+		//	//m_buffer.WriteUInt32(totallength);
 
-		}
+		//	//// Write the Color data at the fifth slot
+		//	//m_buffer.Get()[4] = GetColorAttrib(data.clientColor);
+
+		//	//// Write the length of the username at the 6th index [typecasting to char justin case]
+		//	//m_buffer.Get()[5] = (char)data.userName.length();
+
+		//	//// Atach the username
+		//	//m_buffer.WriteString(6,data.userName);
+
+		//	//// Finally add the actual message
+		//	//m_buffer.WriteString(message);
+
+		//	/*const char* bufferText = m_buffer.Get();*/
+		//	const char* bufferText = "m_buffer.Get()";
+
+
+		//	send(sock, bufferText, totallength, 0);
+
+		//}
 
 		SOCKET TCPServer::CreateSocket()
 		{
@@ -521,29 +571,31 @@ namespace FanshaweGameEngine
 			return color;
 		}
 
-		int TCPServer::ReceiveMsg(SOCKET socket, std::string& decodedmessage)
-		{
-			m_buffer.ClearBuffer();
+		//int TCPServer::ReceiveMsg(SOCKET socket, std::string& decodedmessage)
+		//{
+		//	//m_buffer.ClearBuffer();
 
-			// Get the First 4 bytes to get the message length (LENGTH PREFIXING)
-			int bytesReceived = recv(socket, m_buffer.Get(), 4, 0);
+		//	//// Get the First 4 bytes to get the message length (LENGTH PREFIXING)
+		//	//int bytesReceived = recv(socket, m_buffer.Get(), 4, 0);
 
-			// Use Endian Decoding to gather the incoming mesasage Length
-			int messageLength = m_buffer.ReadUInt32();
+		//	//// Use Endian Decoding to gather the incoming mesasage Length
+		//	//int messageLength = m_buffer.ReadUInt32();
 
-			//Clear the buffer before receiving data. 
-			m_buffer.ClearBuffer();
+		//	////Clear the buffer before receiving data. 
+		//	//m_buffer.ClearBuffer();
 
-			// Growing the Buffer if needed
-			m_buffer.ResizeBuffer(messageLength);
+		//	//// Growing the Buffer if needed
+		//	//m_buffer.ResizeBuffer(messageLength);
 
-			// Getting the rest of he message
-			bytesReceived = recv(socket, m_buffer.Get(), messageLength, 0);
+		//	//// Getting the rest of he message
+		//	//bytesReceived = recv(socket, m_buffer.Get(), messageLength, 0);
 
-			decodedmessage = std::string(m_buffer.Get(), 0, bytesReceived);
+		//	//decodedmessage = std::string(m_buffer.Get(), 0, bytesReceived);
 
-			return bytesReceived;
-		}
+		//	//return bytesReceived;
+
+		//	return 45;
+		//}
 
 	}
 }

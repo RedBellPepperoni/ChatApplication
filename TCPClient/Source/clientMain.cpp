@@ -3,28 +3,55 @@
 #include <iostream>
 #include <sstream>
 
+
+//FanshaweGameEngine::Network::Buffer testBuffer;
+bool newUser = false;
+
+void DisplayMainMenu()
+{
+	
+
+
+	std::cout << "Select Action : [Press number relating to the action]" << std::endl;
+	std::cout << "Press 1 : Connect using exisiting account" << std::endl;
+	std::cout << "Press 2 : Create and Connect using a new account" << std::endl;
+
+	int selection;
+
+	std::cin >> selection;
+
+	if (selection == 1)
+	{
+		newUser = false;
+	}
+	else if (selection == 2)
+	{
+		newUser = true;
+	}
+
+	else
+	{
+		std::cout << "Incorrect option Selected" << std::endl;
+		DisplayMainMenu();
+
+	}
+}
+
 int main(int argc, char* argv)
 {
-	//FanshaweGameEngine::Network::Buffer testBuffer;
 
-	
 	std::string msg = "a";
 	std::string username;
 
+	DisplayMainMenu();
+
+
 	FanshaweGameEngine::Network::TCPClient client;
-
-	std::cout << "Enter your username." << std::endl;
-
-	// get teh Username from the Client
-	std::cin >> username;
-
-	client.SetUsername(username);
-
 
 	if (client.Init())
 	{
 
-		client.Connect();
+		client.Connect(newUser);
 
 		client.m_clientThread = std::thread([&] {client.ThreadReceive(); });
 

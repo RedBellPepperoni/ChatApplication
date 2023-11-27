@@ -63,8 +63,8 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_packet_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\014packet.proto\022\006packet\"L\n\006Packet\022\023\n\013mess"
-  "ageType\030\001 \002(\005\022\r\n\005color\030\002 \002(\005\022\020\n\010username"
-  "\030\003 \002(\t\022\014\n\004data\030\004 \002(\014"
+  "ageType\030\001 \002(\005\022\r\n\005color\030\002 \001(\005\022\020\n\010username"
+  "\030\003 \002(\t\022\014\n\004data\030\004 \002(\t"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_packet_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_packet_2eproto = {
@@ -99,7 +99,7 @@ class Packet::_Internal {
     (*has_bits)[0] |= 2u;
   }
   static bool MissingRequiredFields(const HasBits& has_bits) {
-    return ((has_bits[0] & 0x0000000f) ^ 0x0000000f) != 0;
+    return ((has_bits[0] & 0x00000007) ^ 0x00000007) != 0;
   }
 };
 
@@ -204,7 +204,7 @@ const char* Packet::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
         } else
           goto handle_unusual;
         continue;
-      // required int32 color = 2;
+      // optional int32 color = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
           _Internal::set_has_color(&has_bits);
@@ -225,11 +225,14 @@ const char* Packet::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::int
         } else
           goto handle_unusual;
         continue;
-      // required bytes data = 4;
+      // required string data = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
           auto str = _internal_mutable_data();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "packet.Packet.data");
+          #endif  // !NDEBUG
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -271,7 +274,7 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_messagetype(), target);
   }
 
-  // required int32 color = 2;
+  // optional int32 color = 2;
   if (cached_has_bits & 0x00000008u) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_color(), target);
@@ -287,9 +290,13 @@ failure:
         3, this->_internal_username(), target);
   }
 
-  // required bytes data = 4;
+  // required string data = 4;
   if (cached_has_bits & 0x00000002u) {
-    target = stream->WriteBytesMaybeAliased(
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_data().data(), static_cast<int>(this->_internal_data().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "packet.Packet.data");
+    target = stream->WriteStringMaybeAliased(
         4, this->_internal_data(), target);
   }
 
@@ -313,9 +320,9 @@ size_t Packet::RequiredFieldsByteSizeFallback() const {
   }
 
   if (_internal_has_data()) {
-    // required bytes data = 4;
+    // required string data = 4;
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_data());
   }
 
@@ -324,33 +331,25 @@ size_t Packet::RequiredFieldsByteSizeFallback() const {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_messagetype());
   }
 
-  if (_internal_has_color()) {
-    // required int32 color = 2;
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_color());
-  }
-
   return total_size;
 }
 size_t Packet::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:packet.Packet)
   size_t total_size = 0;
 
-  if (((_has_bits_[0] & 0x0000000f) ^ 0x0000000f) == 0) {  // All required fields are present.
+  if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
     // required string username = 3;
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_username());
 
-    // required bytes data = 4;
+    // required string data = 4;
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_data());
 
     // required int32 messageType = 1;
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_messagetype());
-
-    // required int32 color = 2;
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_color());
 
   } else {
     total_size += RequiredFieldsByteSizeFallback();
@@ -358,6 +357,12 @@ size_t Packet::ByteSizeLong() const {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
+
+  // optional int32 color = 2;
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000008u) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_color());
+  }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
 }

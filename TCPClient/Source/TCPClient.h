@@ -1,11 +1,7 @@
 #pragma once
 #include <string>
 #include <thread>
-#include <WS2tcpip.h>
-#include "Buffer/Buffer.h"
-
-#pragma comment (lib, "ws2_32.lib")
-
+#include "Auth/AuthService.h"
 
 namespace FanshaweGameEngine
 {
@@ -20,17 +16,19 @@ namespace FanshaweGameEngine
 			~TCPClient();
 
 			bool Init();
-			void Connect();
+			void Connect(bool newuser);
+			
+
 
 			void SendMsg(const std::string msgText);
-			int ReceiveMsg(SOCKET sock, int& colorAttrib, std::string& username, std::string& decodedMessage);
+			//int ReceiveMsg(SOCKET sock, int& colorAttrib, std::string& username, std::string& decodedMessage);*/
 
 			std::thread m_clientThread;
 			void ThreadReceive();
 
 			std::string GetUsername() const;
 			void SetUsername(const std::string newName);
-			
+			void SetPassword(const std::string password);
 			
 			bool GetConnected() const;
 
@@ -38,12 +36,15 @@ namespace FanshaweGameEngine
 
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
+			ProtoManager* protocolmanager = nullptr;
+
 			SOCKET CreateSocket();
 
 			SOCKET m_serverSocket;
 
 			std::string m_serverIp = "127.0.0.1";
 			std::string m_username;
+			std::string m_password;
 
 			int m_serverPort = 5014;
 			bool m_threadRunning = false;
@@ -55,9 +56,7 @@ namespace FanshaweGameEngine
 
 			int White = FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_GREEN;
 
-
-			// Default Bugger is using Big Endian
-			Buffer m_buffer;
+			
 		};
 	}
 }

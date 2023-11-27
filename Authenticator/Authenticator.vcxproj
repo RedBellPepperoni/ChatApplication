@@ -71,12 +71,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExternalIncludePath>$(SolutionDir)External\google\protobuf\;$(SolutionDir)External\;$(ExternalIncludePath)</ExternalIncludePath>
-    <IncludePath>$(ProjectDir)Source\;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)External\mysql\include\;$(SolutionDir)External\;$(ExternalIncludePath)</ExternalIncludePath>
+    <IncludePath>$(ProjectDir)Source\;$(SolutionDir)External\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ExternalIncludePath>$(SolutionDir)External\google\protobuf\;$(SolutionDir)External\;$(ExternalIncludePath)</ExternalIncludePath>
-    <IncludePath>$(ProjectDir)Source\;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)External\mysql\include\;$(SolutionDir)External\;$(ExternalIncludePath)</ExternalIncludePath>
+    <IncludePath>$(ProjectDir)Source\;$(SolutionDir)External\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -118,6 +118,13 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -135,16 +142,38 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Database\DatabaseService.h" />
     <ClInclude Include="Source\Auth\AuthService.h" />
     <ClInclude Include="Source\Buffer\Buffer.h" />
+    <ClInclude Include="Source\Protocol\auth.pb.h" />
+    <ClInclude Include="Source\Protocol\packet.pb.h" />
     <ClInclude Include="Source\ProtoManager.h" />
+    <ClInclude Include="Source\Singleton.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Database\DatabaseService.cpp" />
     <ClCompile Include="Source\Auth\AuthService.cpp" />
     <ClCompile Include="Source\Buffer\Buffer.cpp" />
+    <ClCompile Include="Source\Protocol\auth.pb.cc" />
+    <ClCompile Include="Source\Protocol\packet.pb.cc" />
     <ClCompile Include="Source\ProtoManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TCPClient\TCPClient.vcxproj">
+      <Project>{69991b95-b1ea-41ea-a1d8-a448f0467de0}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\TCPServer\TCPServer.vcxproj">
+      <Project>{08b74ec5-3e97-4606-a222-d0eac0e13b9a}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

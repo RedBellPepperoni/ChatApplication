@@ -3,13 +3,17 @@
 #include <map>
 
 #include "Auth/AuthService.h"
-
+#include "ProtoManager.h"
 
 namespace FanshaweGameEngine
 {
 	namespace Network
 	{
-		
+		struct ClientData
+		{
+			std::string Username;
+			Color color;
+		};
 
 		class TCPServer
 		{
@@ -27,10 +31,6 @@ namespace FanshaweGameEngine
 			// Run the Server after initialising
 			void Run();
 
-			// For some reason SendMessage is defined in windows 
-			void SendMsg(SOCKET sock, const ProtoManager::TCPPacket& packetdata);
-
-
 
 
 
@@ -40,13 +40,12 @@ namespace FanshaweGameEngine
 
 			Color GetUnsedColor();
 
-			int ReceiveMsg(SOCKET socket, std::string& decodedmessage);
-
+			
 
 			std::string m_serverIPaddress;
 			uint32_t m_serverPort;
 
-			
+			ProtoManager* protocolmanager = nullptr;
 
 			// Check to make sure the server is running
 			bool isRunning = false;
@@ -59,7 +58,7 @@ namespace FanshaweGameEngine
 			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 			// Total number of clients that can connect before we refuse any other connections
-			const int m_maxClients = 10;
+			const uint32_t m_maxClients = 10;
 
 			
 			// Conatiner to chekc if a chat color is in use (10 base colors and 1 extra incase needed)
