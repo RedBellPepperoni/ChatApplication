@@ -167,14 +167,6 @@
     <ClCompile Include="Source\Protocol\packet.pb.cc" />
     <ClCompile Include="Source\ProtoManager.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TCPClient\TCPClient.vcxproj">
-      <Project>{69991b95-b1ea-41ea-a1d8-a448f0467de0}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\TCPServer\TCPServer.vcxproj">
-      <Project>{08b74ec5-3e97-4606-a222-d0eac0e13b9a}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

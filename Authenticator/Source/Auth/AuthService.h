@@ -12,9 +12,9 @@ public:
 
 	void SetupService();
 
-	bool AuthenticateUser(SOCKET sock, const std::string& data);
+	bool AuthenticateUser(SOCKET sock, const ProtoManager::TCPPacket data);
 
-	
+	bool CreateAccount(SOCKET sock, const ProtoManager::TCPPacket data);
 	
 
 };

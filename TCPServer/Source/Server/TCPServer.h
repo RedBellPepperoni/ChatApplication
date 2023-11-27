@@ -40,7 +40,7 @@ namespace FanshaweGameEngine
 
 			Color GetUnsedColor();
 
-			
+			AuthService authService;
 
 			std::string m_serverIPaddress;
 			uint32_t m_serverPort;

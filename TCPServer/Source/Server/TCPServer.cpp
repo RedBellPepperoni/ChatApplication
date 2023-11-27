@@ -53,6 +53,8 @@ namespace FanshaweGameEngine
 			std::cout << "Fanshawe Chat Server is Online!..." << std::endl;
 			SetConsoleTextAttribute(hConsole, GetColorAttrib(Color::White));
 
+			authService.SetupService();
+
 			return true;
 		}
 
@@ -163,6 +165,10 @@ namespace FanshaweGameEngine
 						{
 
 						case MessageType::CreateAccount:
+
+							authService.CreateAccount(clientsocket, clientData);
+
+							//authService.AuthenticateUser(clientsocket, clientData);
 
 							break;
 						

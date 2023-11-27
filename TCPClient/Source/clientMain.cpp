@@ -84,7 +84,7 @@ int main(int argc, char* argv)
 			}
 
 			
-			client.SendMsg(messageToSend);
+			client.SendMsg(messageToSend, MessageType::ChatMessage);
 			
 		}
 

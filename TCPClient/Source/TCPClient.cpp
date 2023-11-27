@@ -78,18 +78,27 @@ namespace FanshaweGameEngine
 			
 
 			m_hasConnected = true;
-			SendMsg(m_password);
+
+			if (create)
+			{
+				SendMsg(m_password, MessageType::CreateAccount);
+			}
+			else
+			{
+				SendMsg(m_password, MessageType::Authenticate);
+			}
+			
 
 		}
 
-		void TCPClient::SendMsg(const std::string msgText)
+		void TCPClient::SendMsg(const std::string msgText,const MessageType type)
 		{
 			ProtoManager::TCPPacket packet;
 
 			packet.color = Color::Grey;
 			packet.userName = GetUsername();
 			packet.message = msgText;
-			packet.type = MessageType::Authenticate;
+			packet.type = type;
 
 			protocolmanager->SendProtoMessage(m_serverSocket, packet);
 

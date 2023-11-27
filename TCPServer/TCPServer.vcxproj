@@ -149,6 +149,11 @@
     <ClCompile Include="Source\Server\TCPServer.cpp" />
     <ClCompile Include="Source\serverMain.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Authenticator\Authenticator.vcxproj">
+      <Project>{f593b558-22a4-4602-a2a9-ec79bc046b9c}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

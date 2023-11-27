@@ -20,7 +20,7 @@ namespace FanshaweGameEngine
 			
 
 
-			void SendMsg(const std::string msgText);
+			void SendMsg(const std::string msgText, const MessageType type);
 			//int ReceiveMsg(SOCKET sock, int& colorAttrib, std::string& username, std::string& decodedMessage);*/
 
 			std::thread m_clientThread;
